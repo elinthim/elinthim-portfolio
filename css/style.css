@@ -1,0 +1,1516 @@
+/* ==========================================================================
+   Portfolio – Elin Thim
+   Stil: minimalistisk med kodkänsla. Nästan vit bakgrund, svart text,
+   stora smala rubriker och detaljer i färgerna från kodeditorns
+   syntaxfärgning (temat One Dark), plus kodtaggar och //-kommentarer.
+   Inspirerad av annfro.com och Max Milkins portfolio.
+
+   Det interaktiva – den klickbara retrodatorn, animationerna och
+   hover-effekterna – är byggt i ren CSS, utan JavaScript.
+
+   Mobile first: grundstilarna gäller mobil, media queries lägger till
+   layout för tablet (min-width: 40em) och desktop (min-width: 64em).
+   Brytpunkter i em skalar med användarens textstorlek, till skillnad från px.
+   ========================================================================== */
+
+/* ---------- Typsnitt ---------- */
+/* Typsnitten ligger i projektet (mappen fonts/) i stället för att laddas från
+   Google Fonts. Det går snabbare, fungerar utan extern server och skickar inga
+   besökardata till Google (bättre för GDPR). Filerna är beskurna till de tecken
+   som behövs för svenska. Licenser: fonts/OFL-*.txt.
+   font-display: swap visar reservtypsnittet direkt tills det riktiga har laddats. */
+@font-face {
+  font-family: "Anton";
+  src: url("../fonts/anton.woff") format("woff");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter.woff") format("woff");
+  font-weight: 100 900;   /* Variabelt typsnitt: alla vikter i en fil */
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "VT323";
+  src: url("../fonts/vt323.woff") format("woff");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/jetbrains-mono.woff") format("woff");
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+/* ---------- Variabler ---------- */
+:root {
+  --color-bg: #f7f7f5;
+  --color-ink: #121212;
+  --color-muted: #4a4a4a;
+  --color-line: rgb(18 18 18 / 0.15);
+  /* Syntaxfärger från kodeditor-temat One Dark. De ljusa används som
+     bakgrund bakom svart text (minst 4.5:1 i kontrast) eller som dekoration. */
+  --code-purple: #c678dd;
+  --code-blue: #61afef;
+  --code-green: #98c379;
+  --code-yellow: #e5c07b;
+  --code-red: #e06c75;
+
+  /* Mörkare varianter (från One Light) för text på ljus bakgrund */
+  --code-purple-dark: #a626a4;
+  --code-comment: #5f6672;
+  --color-editor: #282c34;  /* Bakgrunden i One Dark */
+
+  /* Retrodatorn: ljusgrå "platina"-plast */
+  --color-case: #e6e6e2;
+  --color-case-dark: #c9c9c3;
+  --color-crt: #071a0d;
+  --color-phosphor: #8cff9e;
+
+  /* Reservtypsnitt om Google Fonts inte laddas */
+  --font-display: "Anton", Impact, "Arial Narrow", "DejaVu Sans Condensed", sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-screen: "VT323", "Courier New", monospace;
+  --font-code: "JetBrains Mono", Consolas, "Courier New", monospace;
+
+  --space-s: 0.5rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 3rem;
+  --space-2xl: 6rem;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- Grund ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Gör att ankarlänkar inte hamnar under den klistrade headern */
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-ink);
+  background-color: var(--color-bg);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+/* Tydlig fokusmarkering för tangentbordsanvändare. :focus-visible visas inte vid musklick. */
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 4px;
+}
+
+::selection {
+  background-color: var(--code-yellow);
+  color: var(--color-ink);
+}
+
+/* Döljer element visuellt men låter skärmläsare läsa dem.
+   Används för radioknapparna på datorn och för formulärets legend. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Hoppa till innehållet ---------- */
+.skip-link {
+  position: absolute;
+  top: var(--space-s);
+  left: var(--space-s);
+  z-index: 100;
+  padding: var(--space-s) var(--space-m);
+  color: var(--color-bg);
+  background-color: var(--color-ink);
+  /* Flyttas ut ur bild tills den får fokus */
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ---------- Header ---------- */
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s) var(--space-l);
+  padding: var(--space-m);
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.logo {
+  font-family: var(--font-code);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Loggan ser ut som en React-komponent: <ElinThim />
+   Texten efter / i content är alt-text för skärmläsare. Tom alt-text ("")
+   gör att tecknen inte läses upp. Raden utan / är reserv för webbläsare
+   som inte stöder den syntaxen. */
+.logo::before {
+  content: "<";
+  content: "<" / "";
+  color: var(--code-purple-dark);
+}
+
+.logo::after {
+  content: " />";
+  content: " />" / "";
+  color: var(--code-purple-dark);
+}
+
+.nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s) var(--space-l);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Understrykning som växer fram från vänster vid hover */
+.nav-list a {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  background-image: linear-gradient(var(--code-blue), var(--code-blue));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 3px;
+  transition: background-size 0.4s var(--ease);
+}
+
+.nav-list a:hover {
+  background-size: 100% 3px;
+}
+
+/* ---------- Layout ---------- */
+.layout {
+  display: grid;
+  gap: var(--space-2xl);
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: var(--space-l) var(--space-m) var(--space-2xl);
+}
+
+/* main är en "container": rubrikerna storleksanpassas efter mains bredd med
+   enheten cqi (1 % av containerns bredd) i stället för hela fönstrets bredd.
+   min-width: 0 hindrar breda barn från att trycka ut kolumnen. */
+main {
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.section {
+  padding-top: var(--space-2xl);
+}
+
+.section__title {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 13cqi, 9rem);
+  font-weight: 400;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+/* Små kodtaggar <h2> och </h2> runt varje sektionsrubrik, som i koden.
+   Tom alt-text (efter /) gör att skärmläsare inte läser upp dem. */
+.section__title::before,
+.section__title::after {
+  display: block;
+  font-family: var(--font-code);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.6;
+  text-transform: none;
+  color: var(--code-purple-dark);
+}
+
+.section__title::before {
+  content: "<h2>";
+  content: "<h2>" / "";
+  margin-bottom: 0.25rem;
+}
+
+.section__title::after {
+  content: "</h2>";
+  content: "</h2>" / "";
+  margin-top: 0.5rem;
+}
+
+.section__title--huge {
+  font-size: clamp(3.5rem, 17cqi, 13rem);
+}
+
+.section__lead {
+  max-width: 38rem;
+  margin: var(--space-m) 0 var(--space-xl);
+  font-family: var(--font-code);
+  font-size: 1rem;
+  color: var(--code-comment);
+}
+
+/* Ingresstexten ser ut som en kodkommentar */
+.section__lead::before {
+  content: "// ";
+  content: "// " / "";
+}
+
+.code-comment {
+  margin: 0 0 var(--space-s);
+  font-family: var(--font-code);
+  color: var(--code-comment);
+}
+
+/* Handritad ring runt "projekt" som ritas upp när man scrollar fram till den */
+.scribble {
+  position: relative;
+  display: inline-block;
+}
+
+.scribble__ring {
+  position: absolute;
+  inset: -25% -12%;
+  width: 124%;
+  height: 150%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.scribble__ring path {
+  fill: none;
+  stroke: var(--code-purple);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 1;   /* pathLength="1" i HTML gör att hela linjen är 1 enhet lång */
+  stroke-dashoffset: 0;
+}
+
+/* ---------- Hero: HEJ [foto] SAN ---------- */
+.hello {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3cqi;
+  font-family: var(--font-display);
+  font-size: 24cqi;  /* Mindre text och större foto på mobil, se tablet-regeln nedan */
+  line-height: 0.82;
+  text-transform: uppercase;
+}
+
+.hello__word {
+  display: block;
+}
+
+.hello__photo img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+/* Fotot ligger i ett kodeditor-fönster: en mörk list upptill med de tre
+   färgade "fönsterprickarna" och ett filnamn. Listen är ett pseudo-element. */
+.hello__photo {
+  display: block;
+  flex-shrink: 0;
+  width: 30cqi;
+  overflow: hidden;
+  background-color: var(--color-editor);
+  border: 2px solid var(--color-editor);
+  border-radius: 0.6rem;
+  box-shadow: 10px 10px 0 var(--code-purple);
+  transition: transform 0.6s var(--ease);
+}
+
+.hello__photo::before {
+  content: "elin.jpg";
+  content: "elin.jpg" / "";
+  display: block;
+  padding: 0.35rem 0.6rem 0.35rem 3.2rem;
+  font-family: var(--font-code);
+  font-size: clamp(0.55rem, 1.2cqi, 0.8rem);
+  line-height: 1.4;
+  text-transform: none;
+  color: #abb2bf;
+  /* Tre prickar ritade med radial-gradient: röd, gul och grön */
+  background-image:
+    radial-gradient(circle, var(--code-red) 0.3rem, transparent 0.32rem),
+    radial-gradient(circle, var(--code-yellow) 0.3rem, transparent 0.32rem),
+    radial-gradient(circle, var(--code-green) 0.3rem, transparent 0.32rem);
+  background-position: 0.25rem center, 1.15rem center, 2.05rem center;
+  background-size: 0.8rem 0.8rem;
+  background-repeat: no-repeat;
+}
+
+.hello__photo:hover {
+  transform: rotate(-4deg) scale(1.05);
+}
+
+.hero__row {
+  display: grid;
+  gap: var(--space-l);
+  margin-top: var(--space-xl);
+}
+
+.hero__intro h1 {
+  max-width: 22ch;
+  margin-bottom: var(--space-m);
+  font-size: clamp(1.5rem, 1.5rem + 1.5cqi, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.hero__intro p {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.hero__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-m);
+}
+
+/* "Öppen för LIA" med en pulserande prick */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin: 0;
+  padding: 0.3rem 0.9rem;
+  font-family: var(--font-code);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid var(--color-ink);
+  border-radius: 999px;
+}
+
+.status__dot {
+  position: relative;
+  width: 0.55rem;
+  height: 0.55rem;
+  background-color: #2e9e4f;
+  border-radius: 50%;
+}
+
+.status__dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: #2e9e4f;
+  border-radius: 50%;
+  animation: ping 1.8s ease-out infinite;
+}
+
+@keyframes ping {
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Länk med pil som glider åt höger vid hover */
+.arrow-link {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 2px solid currentColor;
+}
+
+.arrow-link::after {
+  content: " →";
+  display: inline-block;
+  transition: transform 0.4s var(--ease);
+}
+
+.arrow-link:hover::after {
+  transform: translateX(0.4rem);
+}
+
+/* Länk för att ladda ner CV:t, med en pil som studsar nedåt vid hover */
+.cv-link {
+  font-family: var(--font-code);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-underline-offset: 0.3em;
+}
+
+.cv-link::after {
+  content: " ↓";
+  content: " ↓" / "";
+  display: inline-block;
+  transition: transform 0.3s var(--ease);
+}
+
+.cv-link:hover::after {
+  transform: translateY(0.25rem);
+}
+
+/* ---------- Ikoner för sociala medier ---------- */
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Varje ikon är en rund knapp. --brand är respektive tjänsts färg. */
+.social {
+  --brand: #181717;
+  position: relative;
+  isolation: isolate;  /* Gör att färgcirkeln (z-index: -1) stannar inuti knappen */
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  color: var(--color-ink);
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  transition: transform 0.4s var(--ease), color 0.3s, border-color 0.3s;
+}
+
+.social--linkedin {
+  --brand: #0a66c2;
+}
+
+.social--instagram {
+  --brand: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+}
+
+.social--facebook {
+  --brand: #0866ff;
+}
+
+.social svg {
+  width: 1.3rem;
+  height: 1.3rem;
+  fill: currentColor;
+  transition: transform 0.4s var(--ease);
+}
+
+/* Färgcirkel som växer ut från mitten vid hover */
+.social::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  background: var(--brand);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.4s var(--ease);
+}
+
+/* Liten etikett ovanför ikonen, hämtas från data-label i HTML.
+   Tom alt-text: skärmläsare får namnet från den dolda texten i stället. */
+.social::after {
+  content: attr(data-label);
+  content: attr(data-label) / "";
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  padding: 0.15rem 0.5rem;
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: #fff;
+  background-color: var(--color-ink);
+  border-radius: 0.3rem;
+  opacity: 0;
+  transform: translate(-50%, 0.4rem);
+  transition: opacity 0.3s, transform 0.3s var(--ease);
+  pointer-events: none;
+}
+
+.social:hover,
+.social:focus-visible {
+  color: #fff;
+  border-color: transparent;
+  transform: translateY(-4px);
+}
+
+.social:hover::before,
+.social:focus-visible::before {
+  transform: scale(1);
+}
+
+.social:hover svg,
+.social:focus-visible svg {
+  transform: rotate(-12deg) scale(1.15);
+}
+
+.social:hover::after,
+.social:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ==========================================================================
+   Retrodatorn
+   ========================================================================== */
+.computer {
+  max-width: 48rem;
+  margin: 0 auto;
+  container-type: inline-size;  /* Texten på skärmen skalar med datorns bredd */
+  filter: drop-shadow(0 30px 40px rgb(0 0 0 / 0.18));
+}
+
+/* Bildskärmen: beige plastlåda med ljus överkant, som en dator från 80-talet */
+.monitor {
+  padding: 4cqi 4cqi 0;
+  background-image: linear-gradient(180deg, #f4f4f1, var(--color-case) 40%, #d6d6d1);
+  border-radius: 1.5rem 1.5rem 0.75rem 0.75rem;
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.7), inset 0 -3px 0 rgb(0 0 0 / 0.08);
+}
+
+.monitor__bezel {
+  padding: 3cqi;
+  background-color: var(--color-case-dark);
+  border-radius: 1rem;
+  box-shadow: inset 0 4px 12px rgb(0 0 0 / 0.3);
+}
+
+/* Skärmen: grön fosforskärm (CRT) med svagt välvd form och linjer */
+.screen {
+  position: relative;
+  min-height: 62cqi;
+  padding: 5cqi;
+  overflow: hidden;
+  font-family: var(--font-screen);
+  font-size: clamp(1rem, 3.6cqi, 1.6rem);
+  line-height: 1.3;
+  color: var(--color-phosphor);
+  background-color: var(--color-crt);  /* Reserv, och gör att kontrastverktyg kan mäta */
+  background-image: radial-gradient(ellipse at center, #11391d 0%, var(--color-crt) 75%);
+  border-radius: 1.5rem / 2rem;
+  text-shadow: 0 0 6px rgb(140 255 158 / 0.55);
+  box-shadow: inset 0 0 40px rgb(0 0 0 / 0.8);
+}
+
+/* Linjer över skärmen, som på en gammal tjock-tv */
+.screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(0deg, transparent 0 2px, rgb(0 0 0 / 0.22) 2px 3px);
+  pointer-events: none;
+}
+
+.screen__on {
+  animation: crt-on 0.7s var(--ease);
+}
+
+/* När skärmen slås på: en ljus linje som vecklas ut till hela bilden */
+@keyframes crt-on {
+  0% {
+    transform: scale(1, 0.01);
+    filter: brightness(4);
+  }
+  40% {
+    transform: scale(1, 0.01);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+.screen__off {
+  display: none;
+  place-items: center;
+  min-height: 52cqi;
+  margin: 0;
+  color: #7fae88;
+  text-align: center;
+  text-shadow: none;
+}
+
+.program p,
+.program ul {
+  margin: 0 0 0.6em;
+}
+
+.program h3 {
+  margin: 0.3em 0 0.2em;
+  font-family: var(--font-screen);
+  font-size: 1.9em;
+  font-weight: 400;
+  line-height: 1;
+  color: #d4ffda;
+  text-transform: uppercase;
+}
+
+.program__path {
+  opacity: 0.8;
+}
+
+/* Skrivmaskinseffekt: texten visas en bokstav i taget (steps) */
+.typing {
+  display: inline-block;
+  vertical-align: bottom;
+  animation: type 0.9s steps(14) both;
+}
+
+@keyframes type {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0); }
+}
+
+/* Blinkande markör efter kommandot */
+.program__path::after {
+  content: "█";
+  margin-left: 0.15em;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.program__meta strong {
+  color: var(--color-ink);
+  background-color: var(--color-phosphor);
+  text-shadow: none;
+  padding: 0 0.3em;
+}
+
+.program__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 0.8em;
+  padding: 0;
+  list-style: none;
+}
+
+/* Länkar på skärmen: [ View code ] – blir inverterade vid hover */
+.program__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em 1em;
+  margin-top: 0.8em;
+}
+
+.program__links a {
+  color: var(--color-phosphor);
+  text-decoration: none;
+  outline-color: var(--color-phosphor);
+}
+
+.program__links a::before {
+  content: "[ ";
+  content: "[ " / "";
+}
+
+.program__links a::after {
+  content: " → ]";
+  content: " → ]" / "";
+}
+
+.program__links a:hover,
+.program__links a:focus-visible {
+  color: var(--color-crt);
+  background-color: var(--color-phosphor);
+  text-shadow: none;
+}
+
+.program__tags li::before {
+  content: "[";
+}
+
+.program__tags li::after {
+  content: "]";
+}
+
+/* Hakan under skärmen: märke, ventilation och lampa */
+.monitor__chin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+  padding: 2.5cqi 1cqi;
+}
+
+.monitor__brand {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  color: #5c5c58;
+}
+
+/* Kodsymbolen </> som märke på skärmens haka */
+.monitor__badge {
+  font-family: var(--font-code);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #7a3b8f;
+}
+
+.monitor__led {
+  width: 0.7rem;
+  height: 0.7rem;
+  background-color: #8f8f8a;
+  border-radius: 50%;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* Tangentbordet */
+.keyboard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-m);
+  margin-top: 1.5cqi;
+  padding: 3cqi;
+  background-image: linear-gradient(180deg, #eeeeeb, #d3d3ce);
+  border-radius: 0.75rem 0.75rem 1.5rem 1.5rem;
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.7);
+  /* Lätt lutning bakåt, som ett riktigt tangentbord */
+  transform: perspective(60rem) rotateX(12deg);
+  transform-origin: top;
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* En tangent: ljus plast med "tjocklek" (box-shadow under) */
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  background-color: #fbfbf9;
+  border-radius: 0.5rem;
+  box-shadow: 0 5px 0 #a6a6a0, 0 7px 12px rgb(0 0 0 / 0.18);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+}
+
+.key__num {
+  font-family: var(--font-screen);
+  font-size: 1.1rem;
+  color: var(--color-muted);
+}
+
+.key:hover {
+  background-color: #fffdf7;
+}
+
+/* Nedtryckt tangent: flyttas ner och tappar sin "tjocklek" */
+.key:active,
+input:checked + .key {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #a6a6a0, 0 2px 4px rgb(0 0 0 / 0.15);
+}
+
+/* Vald projekttangent lyser i en egen syntaxfärg */
+.keys input:checked + .key--1 {
+  background-color: var(--code-green);
+}
+
+.keys input:checked + .key--2 {
+  background-color: var(--code-yellow);
+}
+
+.keys input:checked + .key--3 {
+  background-color: var(--code-blue);
+}
+
+.keys input:checked + .key--4 {
+  background-color: var(--code-purple);
+}
+
+.keys input:checked + .key--5 {
+  background-color: #56b6c2;  /* Cyan från One Dark */
+}
+
+.keys input:checked + .key .key__num {
+  color: var(--color-ink);
+}
+
+/* Radioknapparna är dolda, så fokusmarkeringen visas på tangenten i stället */
+input:focus-visible + .key {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 4px;
+}
+
+.key--power {
+  margin-left: auto;
+  padding-inline: 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background-color: var(--code-red);
+  box-shadow: 0 5px 0 #a8424b, 0 7px 12px rgb(0 0 0 / 0.18);
+}
+
+.key--power:hover {
+  background-color: #e8828a;
+}
+
+#power:checked + .key--power {
+  box-shadow: 0 1px 0 #a8424b, 0 2px 4px rgb(0 0 0 / 0.15);
+}
+
+/* Logiken för datorn. :has() väljer föräldern utifrån vad den innehåller,
+   t.ex. "datorn som innehåller en ikryssad #project-2". Webbläsare utan stöd för
+   :has() hoppar över blocket och visar alla tre projekten under varandra i stället. */
+@supports selector(:has(*)) {
+  .program {
+    display: none;
+    animation: fade-in 0.4s ease;
+  }
+
+  .computer:has(#project-1:checked) .program--1,
+  .computer:has(#project-2:checked) .program--2,
+  .computer:has(#project-3:checked) .program--3,
+  .computer:has(#project-4:checked) .program--4,
+  .computer:has(#project-5:checked) .program--5 {
+    display: block;
+  }
+
+  /* Strömmen av: dölj innehållet och visa meddelandet */
+  .computer:has(#power:not(:checked)) .screen__on {
+    display: none;
+  }
+
+  .computer:has(#power:not(:checked)) .screen__off {
+    display: grid;
+  }
+
+  .computer:has(#power:checked) .monitor__led {
+    background-color: #5dff76;
+    box-shadow: 0 0 8px #5dff76;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+/* ==========================================================================
+   Erfarenhet och utbildning: stora rader
+   ========================================================================== */
+.rows {
+  margin: var(--space-xl) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid var(--color-ink);
+}
+
+/* Vid hover fylls raden med färg från vänster. Bakgrunden är en toning i en
+   enda färg som växer via background-size. Varje rad får en egen
+   syntaxfärg via variabeln --row-color. */
+.row {
+  --row-color: var(--code-green);
+  padding: var(--space-l) var(--space-m);
+  border-bottom: 1px solid var(--color-ink);
+  background-image: linear-gradient(var(--row-color), var(--row-color));
+  background-repeat: no-repeat;
+  background-size: 0 100%;
+  transition: background-size 0.6s var(--ease), color 0.3s;
+}
+
+.row:nth-child(4n + 2) {
+  --row-color: var(--code-purple);
+}
+
+.row:nth-child(4n + 3) {
+  --row-color: var(--code-blue);
+}
+
+.row:nth-child(4n + 4) {
+  --row-color: var(--code-yellow);
+}
+
+.row:hover {
+  background-size: 100% 100%;
+}
+
+.row__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-s) var(--space-l);
+}
+
+.row h3 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 7cqi, 4.5rem);
+  font-weight: 400;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: transform 0.6s var(--ease);
+}
+
+.row:hover h3 {
+  transform: translateX(0.5rem);
+}
+
+.row__meta {
+  margin: 0;
+  font-family: var(--font-code);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.row__list {
+  max-width: 48rem;
+  margin: var(--space-m) 0 0;
+  padding-left: 1.25rem;
+}
+
+.row__text {
+  max-width: 48rem;
+  margin: var(--space-s) 0 0;
+}
+
+.rows--compact h3 {
+  font-size: clamp(1.75rem, 5cqi, 3rem);
+}
+
+/* ---------- Hopfällbar sektion ---------- */
+.details {
+  padding: var(--space-l) var(--space-m);
+  border-bottom: 1px solid var(--color-ink);
+}
+
+.details summary {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;  /* Tar bort standardpilen, ersätts av + nedan */
+}
+
+.details summary::-webkit-details-marker {
+  display: none;
+}
+
+.details summary::after {
+  content: "+";
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: transform 0.3s var(--ease);
+}
+
+.details[open] summary::after {
+  transform: rotate(45deg);
+}
+
+/* ==========================================================================
+   Kontaktformulär
+   ========================================================================== */
+.contact-form {
+  display: grid;
+  gap: var(--space-l);
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Minimalistiska fält: bara en linje under. Linjen är svart och har därmed
+   god kontrast (WCAG 1.4.11 kräver minst 3:1 för formulärkanter). */
+input,
+select {
+  width: 100%;
+  padding: 0.6rem 0;
+  font: inherit;
+  font-size: 1.125rem;
+  color: var(--color-ink);
+  background-color: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--color-ink);
+  border-radius: 0;
+  transition: border-color 0.3s;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font: inherit;
+  font-size: 1.125rem;
+  color: var(--color-ink);
+  background-color: transparent;
+  border: 2px solid var(--color-ink);
+  border-radius: 0.75rem;
+  resize: vertical;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--code-purple);
+}
+
+input::placeholder {
+  color: #6b6b6b;
+}
+
+/* Visa felmarkering först när användaren har lämnat fältet, inte direkt vid sidladdning */
+input:user-invalid,
+textarea:user-invalid {
+  border-color: #b3261e;
+}
+
+.form-row--check {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--space-s);
+}
+
+.form-row--check input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+  accent-color: var(--color-ink);
+}
+
+.form-row--check label {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.required {
+  color: #b3261e;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+/* Svart "pill"-knapp som blir orange vid hover, med en pil som glider */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-bg);
+  background-color: var(--color-ink);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.button::after {
+  content: "→";
+  transition: transform 0.4s var(--ease);
+}
+
+.button:hover {
+  color: var(--color-ink);
+  background-color: var(--code-blue);
+}
+
+.button:hover::after {
+  transform: translateX(0.4rem);
+}
+
+/* ==========================================================================
+   Sidofält
+   ========================================================================== */
+.sidebar {
+  padding-top: var(--space-l);
+  border-top: 2px solid var(--color-ink);
+}
+
+.sidebar h2 {
+  margin-bottom: var(--space-l);
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar h3 {
+  margin: var(--space-l) 0 var(--space-s);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skill-list li {
+  padding: 0.15rem 0.65rem;
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--color-ink);
+  border-radius: 999px;
+  transition: background-color 0.2s;
+}
+
+.skill-list li:nth-child(4n + 1):hover {
+  background-color: var(--code-green);
+}
+
+.skill-list li:nth-child(4n + 2):hover {
+  background-color: var(--code-purple);
+}
+
+.skill-list li:nth-child(4n + 3):hover {
+  background-color: var(--code-blue);
+}
+
+.skill-list li:nth-child(4n + 4):hover {
+  background-color: var(--code-yellow);
+}
+
+/* ==========================================================================
+   Sidfot
+   ========================================================================== */
+.site-footer {
+  padding: var(--space-xl) var(--space-m) var(--space-m);
+  color: var(--color-bg);
+  background-color: var(--color-ink);
+  overflow: hidden;
+}
+
+.site-footer .socials {
+  margin-top: 0.75rem;
+}
+
+.site-footer .social {
+  color: var(--color-bg);
+}
+
+/* GitHubs svarta färg syns inte mot den svarta sidfoten, så här blir den vit */
+.site-footer .social--github {
+  --brand: #fff;
+}
+
+.site-footer .social--github:hover,
+.site-footer .social--github:focus-visible {
+  color: var(--color-ink);
+}
+
+.site-footer .social::after {
+  color: var(--color-ink);
+  background-color: #fff;
+}
+
+.site-footer a {
+  color: var(--code-blue);
+}
+
+.site-footer :focus-visible {
+  outline-color: var(--code-blue);
+}
+
+.contact-list {
+  display: grid;
+  gap: var(--space-m);
+  max-width: 90rem;
+  margin: 0 auto;
+  font-style: normal;  /* <address> är kursiv som standard */
+}
+
+.contact-list p {
+  margin: 0;
+  overflow-wrap: anywhere;  /* Långa länkar ska inte spräcka layouten på smala skärmar */
+}
+
+.contact-list__label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #b5b5b0;
+}
+
+/* Jättestort namn i sidfoten, bara konturen. Dekoration (aria-hidden i HTML). */
+.site-footer__wordmark {
+  margin: var(--space-xl) 0 0;
+  font-family: var(--font-display);
+  font-size: 19vw;
+  line-height: 0.8;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px #6b6b6b;
+  transition: color 0.6s var(--ease);
+}
+
+/* Vid hover fylls namnet med en toning i syntaxfärger (bakgrunden syns genom bokstäverna) */
+.site-footer__wordmark:hover {
+  background-image: linear-gradient(90deg, var(--code-purple), var(--code-blue), var(--code-green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke-color: transparent;
+}
+
+.copyright {
+  max-width: 90rem;
+  margin: var(--space-l) auto 0;
+  color: #b5b5b0;
+}
+
+/* ==========================================================================
+   Animationer vid sidladdning och scroll
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  /* HEJ och SAN glider upp, fotot zoomar in */
+  .hello__word {
+    animation: rise 1s var(--ease) both;
+  }
+
+  .hello__word:last-child {
+    animation-delay: 0.15s;
+  }
+
+  .hello__photo img {
+    animation: zoom-in 1.2s var(--ease) both;
+  }
+
+  /* Scroll-drivna animationer: kopplas till hur långt elementet har kommit in
+     i bild (view()) i stället för till tid. */
+  @supports (animation-timeline: view()) {
+    .section__title,
+    .computer,
+    .row,
+    .contact-form {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 25%;
+    }
+
+    /* Ringen runt "projekt" ritas upp */
+    .scribble__ring path {
+      animation: draw linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 45%;
+    }
+  }
+}
+
+@keyframes rise {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(30%);
+  }
+  to {
+    clip-path: inset(0 0 -10% 0);
+    transform: none;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    clip-path: inset(50% 50%);
+    transform: scale(1.3);
+  }
+  to {
+    clip-path: inset(0);
+    transform: none;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(2.5rem);
+  }
+}
+
+@keyframes draw {
+  from { stroke-dashoffset: 1; }
+}
+
+/* ==========================================================================
+   Tablet
+   ========================================================================== */
+@media (min-width: 40em) {
+  .hello {
+    font-size: 27cqi;
+  }
+
+  .hello__photo {
+    width: 22cqi;
+  }
+
+  /* Headern klistras fast högst upp när man scrollar */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: var(--space-m) var(--space-l);
+  }
+
+  .layout {
+    padding-inline: var(--space-l);
+  }
+
+  .hero__row {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+  .hero__aside {
+    align-items: flex-end;
+  }
+
+  .contact-form {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--space-xl);
+  }
+
+  .form-row--full {
+    grid-column: 1 / -1;
+  }
+
+  .contact-list {
+    grid-template-columns: repeat(3, auto);
+    justify-content: space-between;
+  }
+}
+
+/* ==========================================================================
+   Desktop
+   ========================================================================== */
+@media (min-width: 64em) {
+  /* Sidofältet hamnar till höger. I HTML ligger <main> först så att
+     skärmläsare och tangentbord når huvudinnehållet före sidofältet. */
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 15rem;
+    column-gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .sidebar {
+    padding: 0 0 0 var(--space-l);
+    border-top: 0;
+    border-left: 1px solid var(--color-ink);
+  }
+}
+
+/* Sidofältet följer bara med vid scroll om fönstret är tillräckligt högt
+   för att hela sidofältet ska få plats. */
+@media (min-width: 64em) and (min-height: 52em) {
+  .sidebar {
+    position: sticky;
+    top: 6rem;
+  }
+}
+
+/* ---------- Högkontrastläge ---------- */
+@media (forced-colors: active) {
+  .site-footer__wordmark {
+    color: CanvasText;
+  }
+}
+
+/* ---------- Minskad rörelse ---------- */
+/* Respektera användare som har valt att minska animationer i sitt operativsystem */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .hello__photo:hover,
+  .row:hover h3 {
+    transform: none;
+  }
+}
