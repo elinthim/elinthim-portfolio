@@ -5,7 +5,7 @@ Sidan presenterar mig, mina projekt, min erfarenhet och utbildning, och har ett 
 Själva sidan är på **engelska** (`lang="en"`) så att den kan användas vid jobbansökningar även till internationella företag.
 Kommentarerna i koden och den här README-filen är på svenska.
 
-🔗 **Live-sida:** https://elinthim.github.io/REPO-NAMN/ <!-- Byt ut mot din riktiga länk -->
+🔗 **Live-sida:** https://elinthim.github.io/elinthim-portfolio/ <!-- Byt ut mot din riktiga länk -->
 
 ## Design
 
